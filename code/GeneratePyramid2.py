@@ -2,8 +2,10 @@
 """
 Created on Thu Feb 19 09:08:16 2015
 A Gaussian pyramid is basically a series of increasingly decimated images, 
-traditionally at downsampling rate r=2. At each level, the image is first blurred by convolving with a Gaussian-like filter to prevent aliasing
-in the downsampled image. We then move up a level in the Gaussian pyramid by downsampling the image (halving each dimension). 
+traditionally at downsampling rate r=2. At each level, the image is first
+blurred by convolving with a Gaussian-like filter to prevent aliasing
+in the downsampled image. We then move up a level in the Gaussian pyramid by
+downsampling the image (halving each dimension). 
 To build the Laplacian pyramid, we take each level of the Gaussian pyramid and 
 subtract from it the next level interpolated to the same size.
 
@@ -11,23 +13,13 @@ subtract from it the next level interpolated to the same size.
 
 """
 import numpy as np
+import scipy
 import scipy.signal as sig
 from scipy import misc
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
-img = misc.imread('apple.jpg',flatten=1)
 
-# create a  Binomial (5-tap) filter
-kernel = (1.0/256)*np.array([[1, 4,  6,  4,  1],[4, 16, 24, 16, 4],[6, 24, 36, 24, 6],[4, 16, 24, 16, 4],[1, 4,  6,  4,  1]])
-
-plt.imshow(kernel)
-plt.show()
-#img_up = np.zeros((2*img.shape[0], 2*img.shape[1]))
-#img_up[::2, ::2] = img
-#ndimage.filters.convolve(img_up,4*kernel, mode='constant')
-
-#sig.convolve2d(img_up, 4*kernel, 'same')
 
 def interpolate(image):
     """
@@ -49,7 +41,7 @@ def decimate(image):
     #image_blur = sig.convolve2d(image, kernel, 'same')
     image_blur = ndimage.filters.convolve(image,kernel, mode='constant')
     # Downsample
-    return image_blur[::2, ::2]                                
+    return image_blur[::2, ::2] # this slices the list so that only every other pixel is kept                               
                
                                                  
 # here is the constructions of pyramids
@@ -77,47 +69,70 @@ def pyramids(image):
 
     return G[:-1], L
                                 
-#interpolate(img)
-#decimate(img)
-[G,L] = pyramids(img)
+
 
 
 # reconstruct the pyramids, here you write a reconstrut function that takes the 
 # pyramid and upsampling the each level and add them up. 
-#def reconstruct(L,G):
-
-
-rows, cols = img.shape
-composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
-composite_image[:rows, :cols] = G[0]
-
-i_row = 0
-for p in G[1:]:
-    n_rows, n_cols = p.shape[:2]
-    composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
-    i_row += n_rows
-
-
-fig, ax = plt.subplots()
+def reconstruct(L,G):
+    print("reconstruction")
     
-ax.imshow(composite_image,cmap='gray')
-plt.show()
+def runner(imgA, imgB):
 
-
-rows, cols = img.shape
-composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
-
-composite_image[:rows, :cols] = L[0]
-
-i_row = 0
-for p in L[1:]:
-    n_rows, n_cols = p.shape[:2]
-    composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
-    i_row += n_rows
-
-
-fig, ax = plt.subplots()
+    #interpolate(img)
+    #decimate(img)
+    [gausPyrA,laplPyrA] = pyramids(imgA)
+    [gausPyrB,laplPyrB] = pyramids(imgB)
     
-ax.imshow(composite_image,cmap='gray')
+    rowsA, colsA = imgA.shape
+    rowsB, colsB = imgB.shape
+    
+    composite_image = np.zeros((rowsA, colsA + colsA / 2), dtype=np.double)
+    composite_image[:rowsA, :colsA] = G[0]
+
+    i_row = 0
+    for pLev in gausPyrA[1:]:
+        n_rowsA, n_colsA = pLev.shape[:2]
+        composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = pLev
+        i_row += n_rows
+
+
+    fig, ax = plt.subplots()
+        
+    ax.imshow(composite_image,cmap='gray')
+    plt.show()
+
+
+    rows, cols = img.shape
+    composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
+
+    composite_image[:rows, :cols] = L[0]
+
+    i_row = 0
+    for pLev in laplPyrA[1:]:
+        n_rowsA, n_colsA = p.shape[:2]
+        composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
+        i_row += n_rows
+
+
+    fig, ax = plt.subplots()
+        
+    ax.imshow(composite_image,cmap='gray')
+    plt.show()
+                             
+
+imgA = scipy.misc.imread('apple.jpg',flatten=1)
+imgB = scipy.misc.imread('orange.jpg',flatten=1)
+
+# create a  Binomial (5-tap) filter
+kernel = (1.0/256)*np.array([[1, 4,  6,  4,  1],[4, 16, 24, 16, 4],[6, 24, 36, 24, 6],[4, 16, 24, 16, 4],[1, 4,  6,  4,  1]])
+
+plt.imshow(kernel)
 plt.show()
-                                          
+#img_up = np.zeros((2*img.shape[0], 2*img.shape[1]))
+#img_up[::2, ::2] = img
+#ndimage.filters.convolve(img_up,4*kernel, mode='constant')
+
+#sig.convolve2d(img_up, 4*kernel, 'same')
+
+runner(imgA, imgB)

@@ -143,7 +143,7 @@ def halves(lPyrA, lPyrB):
         #print(laplA)
         laplA = np.asarray(laplA)
         print('laplA shape: ' + str(laplA.shape))
-        laplA = laplA[..., np.newaxis]
+        laplA = laplA[..., np.newaxis]#mine
         rowCount, colCount = laplA.shape #depthCount colCount
         ls = np.stack((laplA[:,0:colCount/2], laplB[:, colCount/2:]))
         LS.append(ls)
