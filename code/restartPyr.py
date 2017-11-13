@@ -16,6 +16,7 @@ from scipy import misc
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
+
 def main():
     while(True):
         try:
@@ -60,14 +61,24 @@ def main():
     
 def collapse(joinedPyr, kernel):
     print('collapse')
+
+    np.set_printoptions(threshold='nan')
     
     output = np.zeros((joinedPyr[0].shape[0],joinedPyr[0].shape[1]), dtype=np.float64)
     for i in range(len(joinedPyr)-1,0,-1):
         
         #we're expanding it
         focusLevel = joinedPyr[i]
-        focus2 = np.zeros((focusLevel.shape[0]*2, focusLevel.shape[1]*2), dtype=np.float64)
+        focus2 = np.zeros((focusLevel.shape[0]*2, focusLevel.shape[1]*2, focusLevel.shape[2]), dtype=np.float64)
+
+        print i
+        #print focusLevel
+        print('focus2')
+
+        #print focus2
+        
         focus2[::2,::2] = focusLevel[:,:]
+        
         focusA = 4*scipy.signal.convolve2d(focus2,kernel,'same')
         
         focusB = joinedPyr[i-1]
@@ -167,8 +178,6 @@ def pyramids(image, kernel, rate):
         #the lapl level is a level of gaus minus the next level up
 
     return gausPyr[:-1], laplPyr #:-1
-
-
 
 
 
