@@ -41,7 +41,7 @@ def decimate(image):
     #image_blur = sig.convolve2d(image, kernel, 'same')
     image_blur = ndimage.filters.convolve(image,kernel, mode='constant')
     # Downsample
-    return image_blur[::2, ::2]                                
+    return image_blur[::2, ::2] # this slices the list so that only every other pixel is kept                               
                
                                                  
 # here is the constructions of pyramids

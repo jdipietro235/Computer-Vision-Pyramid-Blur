@@ -3,6 +3,12 @@
 # lets see what needs to be done
 
 #import images - DONE (and quite nicely if i do say so myself
+# decimate function - DONE
+# interpolate function
+# Create lapl Pyramid
+#   input is image
+#   output is lapl and gaus pyramids
+
 
 
 def main():
@@ -24,10 +30,21 @@ def main():
 
 
 
+def decimate(image, kernel, rate):
+    imageBlurred = ndimage.filters.convolve(image, kernel, mode = 'constant')
+    imageDecimated = imageBlurred[::rate, ::rate] #keeps every (rate) pixel
+
+    return imageDecimated
 
 
+def interpolate(image, kernel, rate):
+    newImage = np.zeros(rate*image.shape[0], rate*image.shape[1])
+    newImage[::rate, ::rate] = image
 
+    dRate = rate*2
+    output = ndimage.filters.convolve(newImage, dRate*kernel, mode='constant')
 
+    return output
 
 
 
