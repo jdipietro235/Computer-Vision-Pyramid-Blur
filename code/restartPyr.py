@@ -19,28 +19,77 @@ from scipy import ndimage
 def main():
     while(True):
         try:
-            imageAName = raw_input('Image A filename\n> ')
-            imageA = misc.imread(imageAName)
+            #imageAName = raw_input('Image A filename\n> ')
+            imageAName = 'apple.jpg'
+            imageA = misc.imread(imageAName, flatten=True)
             break
         except(IOError):
             print('invalid name')
 
     while(True):
         try:
-            imageBName = raw_input('Image B filename\n> ')
-            imageB = misc.imread(imageBName)
+            #imageBName = raw_input('Image B filename\n> ')
+            imageBName = 'orange.jpg'
+            imageB = misc.imread(imageBName, flatten=True)
             break
         except(IOError):
             print('invalid name')
 
-    gausA, laplPyrA = pyramids(imageA)
-    gausB, laplPyrB = pyramids(imageB)
+    kernel = (1.0/256)*np.array([[1, 4,  6,  4,  1],
+                                 [4, 16, 24, 16, 4],
+                                 [6, 24, 36, 24, 6],
+                                 [4, 16, 24, 16, 4],
+                                 [1, 4,  6,  4,  1]])
+
+    
+
+    #gausA, laplPyrA = pyramids(imageA, kernel, 2)
+    #gausB, laplPyrB = pyramids(imageB, kernel, 2)
+
+    pyrA = pyramids(imageA, kernel, 2)
+    pyrB = pyramids(imageB, kernel, 2)
+
+    joinedPyr = halves(pyrA, pyrB)
 
     rowCountA, colCountA = imageA.shape
     rowCountB, colCountB = imageB.shape
+    
 
-    compositeImage = np.zeros((rowCountA, colCountA + colCountA / 2), dtype=np.double)
-    compositeImage[:rowCountA, :colCountA] = gausA[0]
+def halves(glPyrA, glPyrB):
+    print('halves start')
+    output = []
+    print(type(glPyrA))
+    #print(laplPyrA.shape)
+    zipped = (glPyrA[1], glPyrB[1])
+    for laplA, laplB in zipped:
+        print('halves looping')
+        rowCount, colCount, depthCount = laplA.shape
+        layer = np.stack((laplA[:,0:colCount/2], laplB[:, colCount/2:]))
+        output.append(layer)
+        
+
+
+def flux(gaus, laplPyr):
+
+    #gaus, laplPyr = pyramids(image, kernel, rate)
+
+    joinedImage = np.zeros((rowCount, colCount + colCount / 2), dtype=np.double)
+    joinedImage[:rowCount, :colCount] = gaus[0]
+
+    iRow = 0
+    for p in gaus[1:]:
+        nRows, nCols = p.shape[:2]
+        joinedImage[iRow:iRow +nRows, colCount:colCount + nCols] = p
+        iRow += nRows
+
+    
+    fig, ax = plt.subplots()
+
+    ax.imshow(joinedImage, cmap = 'gray')
+    plt.show()
+    
+
+    #return gaus,laplPyr
 
 
 
@@ -52,7 +101,7 @@ def decimate(image, kernel, rate):
 
 
 def interpolate(image, kernel, rate):
-    newImage = np.zeros(rate*image.shape[0], rate*image.shape[1])
+    newImage = np.zeros((rate*image.shape[0], rate*image.shape[1]))
     newImage[::rate, ::rate] = image
 
     dRate = rate*2
@@ -68,11 +117,12 @@ def pyramids(image, kernel, rate):
     modImage = image
 
     while modImage.shape[0] >= 2 and modImage.shape[1] >= 2:
-        modImage = decimate(modImage)
+        modImage = decimate(modImage, kernel, rate)
         gausPyr.append(modImage)
 
-    for i in range(len(GausPyr) - 1):
-        laplPyr.append(gausPyr[i] - interpolate(gaus[i + 1]))
+    for i in range(len(gausPyr) - 1):
+        gausInter = interpolate(gausPyr[i+1], kernel, rate)
+        laplPyr.append(gausPyr[i] - gausInter)
         #the lapl level is a level of gaus minus the next level up
 
     return gausPyr[:-1], laplPyr
