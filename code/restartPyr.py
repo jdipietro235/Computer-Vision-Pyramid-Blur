@@ -46,26 +46,64 @@ def main():
 
     
 
+    print imageA.shape
     #gausA, laplPyrA = pyramids(imageA, kernel, 2)
     #gausB, laplPyrB = pyramids(imageB, kernel, 2)
 
     pyrA = pyramids(imageA, kernel, 2)
     pyrB = pyramids(imageB, kernel, 2)
 
+    print pyrA[1][1].shape
+
     joinedPyr = halves(pyrA, pyrB)
 
-    collapsed = collapse(joinedPyr, kernel)
+    collapsed = smush(joinedPyr, kernel, 2)
 
     rowCountA, colCountA = imageA.shape
     rowCountB, colCountB = imageB.shape
 
 
-def smush(joinedPyr, kernel):
+def smush(joinedPyr, kernel, rate):
     #take the smallest level of the pyramid
     # expand it to match the next larger
     #
-    return('smush')
+    
 
+    #create an empty image to hold smushed stuff
+    #this is pointing at joinedPyr[0] bc thats the bottom layer
+
+    print('joinedPyr[0] shape')
+    print(joinedPyr[0].shape)
+    
+    output = np.zeros((joinedPyr[0].shape[0], joinedPyr[0].shape[1]), dtype=np.float64)
+
+    for i in range(len(joinedPyr)):
+        print len(joinedPyr)
+        layer = joinedPyr[i]
+
+        smushedLayer = interpolate(layer, kernel, rate)
+
+        '''
+        smushedLayer = np.zeros((layer.shape[1]*2, layer.shape[2]*2))
+        smushedLayer[::rate, ::rate] = layer[:,:]
+    # sets an image to zeros. Sets every other pixel to the pixels of og image
+
+        smushedLayer = ndimage.filters.convolve(smushedLayer, 4*kernel, mode='constant')
+        '''
+        #smushedLayer = np.zeros((layer.shape[0]*2, layer.shape[1]*2, layer.shape[2]), dtype=np.float64) #so now we double the size of the thing.
+        #depth might actually be first value, which might be the problem
+
+        # the process that im going thru rn looks a lot like interpolate
+
+        backLayer = joinedPyr[i-1] #-1
+
+        tmp = smushedLayer + backLayer
+        joinedPyr.pop()
+        joinedPyr.pop()
+        joinedPyr.append(tmp)
+        output = tmp
+    return output
+        
     
 def collapse(joinedPyr, kernel):
     print('collapse')
@@ -84,10 +122,9 @@ def collapse(joinedPyr, kernel):
         print('mergedLevel')
 
         #print mergedLevel
-        
         mergedLevel[::2,::2] = focusLevel[:,:]
 
-        focusA = mergedLevel #4*scipy.signal.convolve2d(mergedLevel,kernel,'same')#convolve2d
+        focusA = 4*scipy.signal.convolve2d(mergedLevel,kernel,'same')#convolve2d
         
         focusB = joinedPyr[i-1]
         
@@ -115,13 +152,17 @@ def halves(glPyrA, glPyrB):
     while i < len(zipped):
         print('halves looping')
         laplA = np.asarray(glPyrA[1][i]) #glPyrA[1][i]
+        print'laplA.shape'
+        print laplA.shape
         laplB = np.asarray(glPyrB[1][i])
         #print(laplA)
         #laplA = np.as2darray(laplA)
         rowCount, colCount = laplA.shape
-        layer = np.stack((laplA[:,0:colCount/2], laplB[:, colCount/2:]))
+        layer = np.hstack((laplA[:,0:colCount/2], laplB[:, colCount/2:]))
+        print layer.shape
         output.append(layer)
         i += 1
+    print output[0].shape
     return output
     '''
     for laplA, laplB in zipped:
@@ -164,8 +205,8 @@ def decimate(image, kernel, rate):
 
 
 def interpolate(image, kernel, rate): # returns and image of 2x the size of input
-    newImage = np.zeros((rate*image.shape[0], rate*image.shape[1]))
-    newImage[::rate, ::rate] = image 
+    newImage = np.zeros((image.shape[0]*rate, image.shape[1]*rate))
+    newImage[::rate, ::rate] = image[:,:]
     # sets an image to zeros. Sets every other pixel to the pixels of og image
 
     dRate = rate*2
@@ -179,11 +220,9 @@ def pyramids(image, kernel, rate):
     gausPyr = [image, ]
     laplPyr = []
 
-    modImage = image
-
-    while modImage.shape[0] >= 2 and modImage.shape[1] >= 2:
-        modImage = decimate(modImage, kernel, rate)
-        gausPyr.append(modImage)
+    while image.shape[0] >= 2 and image.shape[1] >= 2:
+        image = decimate(image, kernel, rate)
+        gausPyr.append(image)
 
     for i in range(len(gausPyr) - 1):
         gausInter = interpolate(gausPyr[i+1], kernel, rate)
