@@ -15,6 +15,7 @@ import scipy.signal as sig
 from scipy import misc
 import matplotlib.pyplot as plt
 from scipy import ndimage
+import cv2
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
         try:
             #imageAName = raw_input('Image A filename\n> ')
             imageAName = 'apple.jpg'
-            imageA = misc.imread(imageAName, flatten=1)
+            imageA = misc.imread(imageAName, flatten=0)
             imageA = imageA.astype(float)
             break
         except(IOError):
@@ -32,7 +33,7 @@ def main():
         try:
             #imageBName = raw_input('Image B filename\n> ')
             imageBName = 'orange.jpg'
-            imageB = misc.imread(imageBName, flatten=1)
+            imageB = misc.imread(imageBName, flatten=0)
             imageB = imageB.astype(float)
             break
         except(IOError):
@@ -44,24 +45,50 @@ def main():
                                  [4, 16, 24, 16, 4],
                                  [1, 4,  6,  4,  1]])
 
-    
 
-    print imageA.shape
+    aBlue, aGreen, aRed = imageA[:, :, 0], imageA[:, :, 1], imageA[:, :, 2]
+    bBlue, bGreen, bRed = imageB[:, :, 0], imageB[:, :, 1], imageB[:, :, 2]
+
+
+    
     #gausA, laplPyrA = pyramids(imageA, kernel, 2)
     #gausB, laplPyrB = pyramids(imageB, kernel, 2)
 
-    pyrA = pyramids(imageA, kernel, 2)
-    pyrB = pyramids(imageB, kernel, 2)
+    pyrAblue = pyramids(aBlue, kernel, 2)
+    pyrAgreen = pyramids(aGreen, kernel, 2)
+    pyrAred = pyramids(aRed, kernel, 2)
 
-    print pyrA[1][1].shape
+    pyrBblue = pyramids(bBlue, kernel, 2)
+    pyrBgreen = pyramids(bGreen, kernel, 2)
+    pyrBred = pyramids(bRed, kernel, 2)
 
-    joinedPyr = halves(pyrA, pyrB)
+    #print pyrA[1][1].shape
 
-    collapsed = smush(joinedPyr, kernel, 2)
+    joinedPyrBlue = halves(pyrAblue, pyrBblue)
+    joinedPyrGreen = halves(pyrAgreen, pyrBgreen)
+    joinedPyrRed = halves(pyrAred, pyrBred)
+
+    collapsedBlue = smush(joinedPyrBlue, kernel, 2)
+    collapsedGreen = smush(joinedPyrGreen, kernel, 2)
+    collapsedRed = smush(joinedPyrRed, kernel, 2)
 
     fig, ax = plt.subplots()
         
-    ax.imshow(collapsed,cmap='gray')
+    ax.imshow(collapsedRed,cmap='gray')
+    plt.show()
+
+    collapsedBlue = collapsedBlue[..., np.newaxis]
+    collapsedGreen = collapsedGreen[..., np.newaxis]
+    collapsedRed = collapsedRed[..., np.newaxis]
+
+    stacked = collapsedBlue, collapsedGreen, collapsedRed
+    print('collaplsedBlue shape')
+    print(collapsedBlue.shape)
+    end_img = np.dstack(stacked)
+
+    fig, ax = plt.subplots()
+        
+    ax.imshow(end_img,cmap='gray')
     plt.show()    
 
 
@@ -254,9 +281,6 @@ def pyramids(image, kernel, rate):
         #the lapl level is a level of gaus minus the next level up
 
     return gausPyr[:-1], laplPyr #:-1
-
-
-
 
 
 
