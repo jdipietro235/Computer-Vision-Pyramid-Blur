@@ -58,6 +58,14 @@ def main():
 
     rowCountA, colCountA = imageA.shape
     rowCountB, colCountB = imageB.shape
+
+
+def smush(joinedPyr, kernel):
+    #take the smallest level of the pyramid
+    # expand it to match the next larger
+    #
+    return('smush')
+
     
 def collapse(joinedPyr, kernel):
     print('collapse')
@@ -69,23 +77,26 @@ def collapse(joinedPyr, kernel):
         
         #we're expanding it
         focusLevel = joinedPyr[i]
-        focus2 = np.zeros((focusLevel.shape[0]*2, focusLevel.shape[1]*2, focusLevel.shape[2]), dtype=np.float64)
+        mergedLevel = np.zeros((focusLevel.shape[0]*2, focusLevel.shape[1]*2, focusLevel.shape[2]), dtype=np.float64)
 
         print i
         #print focusLevel
-        print('focus2')
+        print('mergedLevel')
 
-        #print focus2
+        #print mergedLevel
         
-        focus2[::2,::2] = focusLevel[:,:]
-        
-        focusA = 4*scipy.signal.convolve2d(focus2,kernel,'same')
+        mergedLevel[::2,::2] = focusLevel[:,:]
+
+        focusA = mergedLevel #4*scipy.signal.convolve2d(mergedLevel,kernel,'same')#convolve2d
         
         focusB = joinedPyr[i-1]
+        
         if focusA.shape[0] > focusB.shape[0]:
             focusA = np.delete(focusA,(-1),axis=0)
+            
         if focusA.shape[1] > focusB.shape[1]:
             lap = np.delete(lap,(-1),axis=1)
+            
         tmp = focusA + focusB
         joinedPyr.pop()
         joinedPyr.pop()
@@ -103,7 +114,7 @@ def halves(glPyrA, glPyrB):
     i = 0
     while i < len(zipped):
         print('halves looping')
-        laplA = np.asarray(glPyrA[1][i])
+        laplA = np.asarray(glPyrA[1][i]) #glPyrA[1][i]
         laplB = np.asarray(glPyrB[1][i])
         #print(laplA)
         #laplA = np.as2darray(laplA)
@@ -147,17 +158,19 @@ def flux(gaus, laplPyr):
 
 def decimate(image, kernel, rate):
     imageBlurred = ndimage.filters.convolve(image, kernel, mode = 'constant')
-    imageDecimated = imageBlurred[::rate, ::rate] #keeps every (rate) pixel
+    imageDecimated = imageBlurred[::rate, ::rate] #keeps every other(rate) pixel
 
     return imageDecimated
 
 
-def interpolate(image, kernel, rate):
+def interpolate(image, kernel, rate): # returns and image of 2x the size of input
     newImage = np.zeros((rate*image.shape[0], rate*image.shape[1]))
-    newImage[::rate, ::rate] = image
+    newImage[::rate, ::rate] = image 
+    # sets an image to zeros. Sets every other pixel to the pixels of og image
 
     dRate = rate*2
     output = ndimage.filters.convolve(newImage, dRate*kernel, mode='constant')
+    # blurs the out image so that it doesnt have white pixels all over the place
 
     return output
 
