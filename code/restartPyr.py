@@ -59,8 +59,10 @@ def main():
 
     collapsed = smush(joinedPyr, kernel, 2)
 
-    rowCountA, colCountA = imageA.shape
-    rowCountB, colCountB = imageB.shape
+    fig, ax = plt.subplots()
+        
+    ax.imshow(collapsed,cmap='gray')
+    plt.show()    
 
 
 def smush(joinedPyr, kernel, rate):
@@ -77,11 +79,24 @@ def smush(joinedPyr, kernel, rate):
     
     output = np.zeros((joinedPyr[0].shape[0], joinedPyr[0].shape[1]), dtype=np.float64)
 
-    for i in range(len(joinedPyr)):
+    print('pyramid sizes')
+    print joinedPyr[0].shape
+    print joinedPyr[1].shape
+    #print joinedPyr[2].shape
+
+    i = len(joinedPyr)
+    
+        
+    #for i in reversed(xrange(len(joinedPyr))):
+    while i > 1:
         print len(joinedPyr)
-        layer = joinedPyr[i]
+        layer = joinedPyr[i-1]
 
         smushedLayer = interpolate(layer, kernel, rate)
+
+        print('smushedlayer size')
+        print smushedLayer.shape
+
 
         '''
         smushedLayer = np.zeros((layer.shape[1]*2, layer.shape[2]*2))
@@ -95,13 +110,22 @@ def smush(joinedPyr, kernel, rate):
 
         # the process that im going thru rn looks a lot like interpolate
 
-        backLayer = joinedPyr[i-1] #-1
+        backLayer = joinedPyr[i-2] #-1
+        '''
+        if smushedLayer.shape[0] > backLayer.shape[0]:
+            smushedLayer = np.delete(smushedLayer,(-1),axis=0)
+            
+        if smushedLayer.shape[1] > backLayer.shape[1]:
+            smushedLayer = np.delete(smushedLayer,(-1),axis=1)
+        '''        
 
         tmp = smushedLayer + backLayer
+        
         joinedPyr.pop()
         joinedPyr.pop()
         joinedPyr.append(tmp)
         output = tmp
+        i -= 1
     return output
         
     
