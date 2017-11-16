@@ -1,5 +1,4 @@
 
-
 import numpy as np
 import scipy
 import scipy.signal as sig
@@ -7,6 +6,10 @@ from scipy import misc
 import matplotlib.pyplot as plt
 from scipy import ndimage
 import cv2
+
+# Justin DiPietro
+# Computer Vision Assignement 4
+
 
 
 def main():
@@ -41,10 +44,6 @@ def main():
     bBlue, bGreen, bRed = imageB[:, :, 0], imageB[:, :, 1], imageB[:, :, 2]
 
 
-    
-    #gausA, laplPyrA = pyramids(imageA, kernel, 2)
-    #gausB, laplPyrB = pyramids(imageB, kernel, 2)
-
     pyrAblue = pyramids(aBlue, kernel, 2)
     pyrAgreen = pyramids(aGreen, kernel, 2)
     pyrAred = pyramids(aRed, kernel, 2)
@@ -52,8 +51,6 @@ def main():
     pyrBblue = pyramids(bBlue, kernel, 2)
     pyrBgreen = pyramids(bGreen, kernel, 2)
     pyrBred = pyramids(bRed, kernel, 2)
-
-    #print pyrA[1][1].shape
 
     joinedPyrBlue = halves(pyrAblue, pyrBblue)
     joinedPyrGreen = halves(pyrAgreen, pyrBgreen)
@@ -68,11 +65,9 @@ def main():
     collapsedRed = collapsedRed[..., np.newaxis]
 
     stacked = collapsedBlue, collapsedGreen, collapsedRed
-    print('collaplsedBlue shape')
-    print(collapsedBlue.shape)
     end_img = np.dstack(stacked)
 
-    cv2.imwrite('house_castle_badCode.jpg',end_img)
+    #cv2.imwrite('house_castle_badCode.jpg',end_img)
 
     
     fig, ax = plt.subplots()
@@ -87,21 +82,14 @@ def collapse(joinedPyr, kernel, rate):
     # expand it to match the next larger
     #create an empty image to hold smushed stuff
     #this is pointing at joinedPyr[0] bc thats the bottom layer
-
-    print('joinedPyr[0] shape')
-    print(joinedPyr[0].shape)
     
     output = np.zeros((joinedPyr[0].shape[0], joinedPyr[0].shape[1]), dtype=np.float64)
     
     i = len(joinedPyr)
     while i > 1:
-        print len(joinedPyr)
         layer = joinedPyr[i-1]
 
         smushedLayer = interpolate(layer, kernel, rate)
-
-        print('smushedlayer size')
-        print smushedLayer.shape
 
         backLayer = joinedPyr[i-2] #-1
             
@@ -135,7 +123,7 @@ def halves(glPyrA, glPyrB):
 def flux(gaus, laplPyr):
 
     #gaus, laplPyr = pyramids(image, kernel, rate)
-    rowCount, colCount = lapl[0].shape
+    rowCount, colCount = laplPyr[0].shape
 
     compoundImg = np.zeros((rowCount, colCount + colCount / 2), dtype=np.double)
     compoundImg[:rowCount, :colCount] = gaus[0]
@@ -151,7 +139,8 @@ def flux(gaus, laplPyr):
 
     ax.imshow(compoundImg, cmap = 'gray')
     plt.show()
-    
+
+    cv2.imwrite('house_castle_compound.jpg',compoundImg)
 
     return compoundImg
 
