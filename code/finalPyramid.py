@@ -13,7 +13,7 @@ def main():
     while(True):
         try:
             #imageAName = raw_input('Image A filename\n> ')
-            imageAName = 'apple.jpg'
+            imageAName = 'house.png'
             imageA = misc.imread(imageAName, flatten=0)
             imageA = imageA.astype(float)
             break
@@ -23,7 +23,7 @@ def main():
     while(True):
         try:
             #imageBName = raw_input('Image B filename\n> ')
-            imageBName = 'orange.jpg'
+            imageBName = 'castle.png'
             imageB = misc.imread(imageBName, flatten=0)
             imageB = imageB.astype(float)
             break
@@ -59,12 +59,9 @@ def main():
     joinedPyrGreen = halves(pyrAgreen, pyrBgreen)
     joinedPyrRed = halves(pyrAred, pyrBred)
 
-
     collapsedBlue = collapse(joinedPyrBlue, kernel, 2)
     collapsedGreen = collapse(joinedPyrGreen, kernel, 2)
     collapsedRed = collapse(joinedPyrRed, kernel, 2)
-
-
 
     collapsedBlue = collapsedBlue[..., np.newaxis]
     collapsedGreen = collapsedGreen[..., np.newaxis]
@@ -75,10 +72,14 @@ def main():
     print(collapsedBlue.shape)
     end_img = np.dstack(stacked)
 
+    cv2.imwrite('house_castle_badCode.jpg',end_img)
+
+    
     fig, ax = plt.subplots()
         
-    ax.imshow(end_img,cmap='gray')
-    plt.show()    
+    ax.imshow(end_img)
+    plt.show()
+    
 
 
 def collapse(joinedPyr, kernel, rate):
@@ -91,14 +92,8 @@ def collapse(joinedPyr, kernel, rate):
     print(joinedPyr[0].shape)
     
     output = np.zeros((joinedPyr[0].shape[0], joinedPyr[0].shape[1]), dtype=np.float64)
-
-    print('pyramid sizes')
-    print joinedPyr[0].shape
-    print joinedPyr[1].shape
-    #print joinedPyr[2].shape
-
-    i = len(joinedPyr)
     
+    i = len(joinedPyr)
     while i > 1:
         print len(joinedPyr)
         layer = joinedPyr[i-1]
@@ -140,6 +135,7 @@ def halves(glPyrA, glPyrB):
 def flux(gaus, laplPyr):
 
     #gaus, laplPyr = pyramids(image, kernel, rate)
+    rowCount, colCount = lapl[0].shape
 
     compoundImg = np.zeros((rowCount, colCount + colCount / 2), dtype=np.double)
     compoundImg[:rowCount, :colCount] = gaus[0]
@@ -176,11 +172,6 @@ def interpolate(image, kernel, rate): # returns and image of 2x the size of inpu
     dRate = rate*2
     output = ndimage.filters.convolve(newImage, dRate*kernel, mode='constant')
     # blurs the out image so that it doesnt have white pixels all over the place
-
-    fig, ax = plt.subplots()
-        
-    ax.imshow(output,cmap='gray')
-    plt.show()
 
     return output
 
