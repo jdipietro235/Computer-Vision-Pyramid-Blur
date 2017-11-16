@@ -137,16 +137,19 @@
 	<h2>CSC 589 AU / Homework 4 / Image Blending Using Pyramids</h2>
 
 	<div style="float: right; padding: 20px">
-		<img src="placeholder.jpg" />
+		<img src="first attempt to colorize.png"  width="70%" />
 		<p style="font-size: 14px">
-			Example of a right floating element.
+			Apple and Orange combined down the middle.
 		</p>
 	</div>
 
 	<p> 	
-		AFTER PUTTING UPWARDS OF 50 HOURS INTO THIS ASSIGNMENT, IT STILL DOESN'T WORK Lorem 
-		Put the github page in here
-		steps:
+	In this assignment I attempted to develop a program that would take two images of the same size and blend them together down the middle in a way that would not leave a clear line where the images were connected. Despite many hours of effort, I was unable to accomplish that. I have included the results from my code and the results from the example code so that the intended effect can be compared to the actual effect.
+	<br>
+	<a href="https://docs.opencv.org/3.2.0/dc/dff/tutorial_py_pyramids.html">Example code</a> 
+	<br>
+	<a href="https://github.com/jdipietro235/Computer-Vision-Pyramid-Blur">Assignment Github Page</a> 
+
 	</p>
 
 	<h3>Process:</h3>
@@ -175,14 +178,14 @@
 		<li>The combined images should form a single color image blurred down the middle.</li>
 	</ol>
 
-	<p> 			
-
-		Example code: https://docs.opencv.org/3.2.0/dc/dff/tutorial_py_pyramids.html</p>
+	<p> 	</p>
 
 	<div style="clear:both">
-	<h3>Example heading</h3>
+	<h3>Pyramid Blending</h3>
 
 	<p> 	I can't comment on the effectiveness of the pyramid method based on my own code, but I can observe some flaws with the results of the example code. This blending method worked really well with the two example images have the same dark background and the subjects are fairly similar in color. The gaussian blurring has a much more pronounced effect in the other image combinations, especially the house and castle. Both of those images are bright and have a lot of white in them. When they are blurred, they end up looking washed out. This pairing also demonstrates how unnatural pyramid method blending looks when 2 different backgrounds are used. Of course, in a real world context, the siloete of the castle would be cut out and placed over the house.
+	<br>
+	The baseball and basketball image also demonstrates a different problem: the blur doesn't help much if the images don't line up. The subject of both images is a large circle, but the baseball is just a little smaller than the basketball and the blending does nothing to conceal that. The blending also bleeds over into the empty space outside of the image subjects.
 	</p>
 
 
@@ -228,7 +231,8 @@
 	</table>
 
 	<div style="clear:both" >
-		<p> 	Clearly the program I wrote doesn't work. Based on the reading I've done about pyramid blending, I don't think that I'm misunderstanding the concept. I believe that the problem is simply a bug in my code that, after many hours of work, I have not been able to identify. 
+		<p> 	Clearly the program I wrote doesn't work. Based on the reading I've done about pyramid blending, I don't think that I'm misunderstanding the concept. I believe that the problem is simply a bug in my code that, after many hours of work, I have not been able to identify. It probably is related to the way the gaussian filter is overlaid on the rest of the pyramid, but there shouldn't be a problem.
+		<br> 
 		I did not want to turn in nonfunctional code, but I can't continue.
 		</p>
 	</div>
